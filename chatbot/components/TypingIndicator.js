@@ -19,7 +19,7 @@ export function createTypingIndicator() {
         <span class="typing-dot w-1.5 h-1.5 bg-neutral-400 rounded-full inline-block"></span>
         <span class="typing-dot w-1.5 h-1.5 bg-neutral-400 rounded-full inline-block"></span>
       </div>
-      <span class="text-[12px] font-medium text-neutral-400">Lumina is thinking...</span>
+      <span class="text-[12px] font-medium text-neutral-400">Denis is thinking...</span>
     </div>
   `;
 

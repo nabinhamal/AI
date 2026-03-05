@@ -12,7 +12,7 @@ export function createSidebar({ userName = "Guest", onNewChat } = {}) {
     <div class="px-5 pt-8 pb-6 flex items-center justify-between">
       <div class="flex items-center gap-3 text-white font-semibold tracking-wide">
         <svg class="text-white" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg>
-        Lumina
+       Denis
       </div>
       <button class="text-neutral-500 hover:text-white transition"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></button>
     </div>
@@ -32,10 +32,12 @@ export function createSidebar({ userName = "Guest", onNewChat } = {}) {
 
     <!-- Main Navigation -->
     <div class="px-3 space-y-1 mb-6">
-      <button class="w-full flex items-center gap-3 text-neutral-400 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        Notifications
-      </button>
+      <div class="flex items-center gap-2.5 px-3 py-4 border-b border-emerald-900/20">
+        <div class="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <span class="font-bold text-white text-[15px] tracking-tight">Denis AI</span>
+      </div>
       <button class="w-full flex items-center gap-3 text-neutral-400 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Community

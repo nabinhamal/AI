@@ -30,10 +30,11 @@ export function showNameModal() {
            <div class="w-12 h-12 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-white shadow-sm mb-4">
              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg>
            </div>
-          <h2 class="text-lg font-bold text-neutral-900">Welcome to Lumina AI</h2>
-          <p class="text-[13px] text-neutral-500 mt-1.5 leading-relaxed font-medium">
-            Please enter your name to personalize your dashboard.
-          </p>
+          <h2 class="text-lg font-bold text-neutral-900">Welcome to Denis AI</h2>
+          <p class="text-neutral-500 text-xs md:text-sm mt-2 leading-relaxed">
+        Let's get started. Denis is ready to help you with your daily tasks and
+        questions.
+      </p>
         </div>
 
         <div class="mb-6">

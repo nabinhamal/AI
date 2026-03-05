@@ -1,7 +1,7 @@
 // components/EnvDB.js
 // A small wrapper around IndexedDB for storing the FileSystemFileHandle to the .env file
 
-const DB_NAME = "LuminaEnvDB";
+const DB_NAME = "Denis_AI_DB";
 const STORE_NAME = "envStore";
 
 function openDB() {
