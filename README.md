@@ -43,7 +43,15 @@ The frontend periodically checks the `/api/health` endpoint.
 
 ---
 
-## 📂 Project Structure
+## �️ Safety & Reliability
+
+- **Infinite Loop Prevention**: The backend limits AI tool calls to a maximum of **6 retries** per request.
+- **Custom Error Handling**: Returns a friendly message when complexity limits are reached.
+- **Thread Isolation**: Each user session is tracked via `threadId`.
+
+---
+
+## �📂 Project Structure
 
 ```
 llm/
@@ -92,40 +100,56 @@ llm/
 
 ## ⚙️ Setup & Installation
 
-### Prerequisites
+Follow these steps to get the project running locally:
 
-- [Node.js](https://nodejs.org/) v18+
-- [Groq API Key](https://console.groq.com/)
-- [Tavily API Key](https://app.tavily.com/)
-
-### 1. Installation
+### 1. Clone the repository
 
 ```bash
 git clone <your-repo-url>
-cd llm
+cd AI
+```
+
+### 2. Install dependencies
+
+```bash
 npm install
 ```
 
-### 2. Configuration
+### 3. Configuration
 
-Create a `.env` file in the root:
+Copy the example environment file and fill in your API keys:
 
-```env
-PORT=3000
-GROQ_API_KEY=your_key_here
-TAVILY_API_KEY=your_key_here
+```bash
+cp .env.example .env
 ```
 
-### 3. Start the Server
+Open the `.env` file and provide your `GROQ_API_KEY` and `TAVILY_API_KEY`.
+
+### 4. Running the Application
+
+#### Start the Backend Server
 
 ```bash
 node server.js
 ```
 
-### 4. Access the App
+The backend will run at `http://localhost:3000`.
 
-- **Default**: Open `http://localhost:3000`
-- **Live Server**: If using VS Code Live Server, open `index.html` on port `5500`. The app will automatically connect to the backend on port `3000`.
+#### Access the Frontend
+
+1. **Directly**: Open `chatbot/index.html` in your browser.
+2. **Live Server (Recommended)**: If using VS Code, use the "Live Server" extension to serve the `chatbot` directory. It usually runs at `http://localhost:5500`.
+
+---
+
+## 🚀 Usage
+
+Wait for the green status indicator in the top bar to pulse—this means the connection to the backend is active.
+
+1. **New Session**: Click "New Chat" in the sidebar to start a fresh thread.
+2. **Search**: Ask for real-time data; Denis will autonomously use Tavily Search to find facts.
+3. **History**: Previous chats are saved in the "Recent Chats" section of the sidebar. Click any item to reload that conversation.
+4. **Clean Exit**: Click the Home icon or "Clear Conversation" to reset your view.
 
 ---
 

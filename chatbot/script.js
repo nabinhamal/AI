@@ -4,6 +4,7 @@ import {
   createSidebar,
   addHistoryItem,
   toggleSidebar,
+  renderHistory,
 } from "./components/Sidebar.js";
 import { createEmptyState } from "./components/EmptyState.js";
 import { createChatMessage } from "./components/ChatMessage.js";
@@ -17,6 +18,15 @@ const SERVER_URL = "http://localhost:3000";
 // ─── State ──────────────────────────────────────────────────────────────────
 let messageCount = 0;
 let conversationHistory = []; // full message history sent to Groq
+let currentThreadId = null;
+
+function getOrGenerateThreadId() {
+  const saved = localStorage.getItem("denis_current_thread");
+  if (saved) return saved;
+  const newId = "thread_" + Math.random().toString(36).substring(2, 11);
+  localStorage.setItem("denis_current_thread", newId);
+  return newId;
+}
 
 // ─── DOM References ──────────────────────────────────────────────────────────
 const sidebarRoot = document.getElementById("sidebar-root");
@@ -32,6 +42,7 @@ const mobileMenuBtn = document.getElementById("mobileMenuBtn");
 const rightSidebar = document.getElementById("right-sidebar");
 const rightSidebarToggle = document.getElementById("rightSidebarToggle");
 const closeRightSidebarBtn = document.getElementById("closeRightSidebarBtn");
+const homeBtn = document.getElementById("homeBtn");
 
 let sidebar;
 let emptyState;
@@ -105,7 +116,95 @@ closeRightSidebarBtn?.addEventListener("click", toggleRightSidebar);
     message: `Welcome back, ${userName}! AI is ready.`,
     duration: 4000,
   });
+
+  // 5. Initialize Thread ID (Persistently)
+  currentThreadId = getOrGenerateThreadId();
+
+  // 6. Initial history fetch
+  await fetchHistory();
+
+  // 7. If we have a persistent thread, try to load its messages
+  if (currentThreadId) {
+    await loadThread(currentThreadId, true); // silent load
+  }
 })();
+
+// ─── History Core ───────────────────────────────────────────────────────────
+async function fetchHistory() {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/threads`);
+    const threads = await res.json();
+    renderHistory(sidebar, threads, {
+      onSelect: loadThread,
+      onDelete: deleteThread,
+    });
+  } catch (e) {
+    console.warn("Failed to fetch history:", e);
+  }
+}
+
+async function loadThread(threadId, silent = false) {
+  try {
+    console.log(`[Thread] Loading ${threadId}...`);
+    const res = await fetch(`${SERVER_URL}/api/chat/${threadId}`);
+    const { messages } = await res.json();
+
+    if (messages && messages.length > 0) {
+      console.log(`[Thread] Loaded ${messages.length} messages.`);
+      messagesEl.innerHTML = "";
+      conversationHistory = messages;
+      currentThreadId = threadId;
+      localStorage.setItem("denis_current_thread", threadId);
+      messageCount = messages.length;
+      emptyState.style.display = "none";
+
+      messages.forEach((msg) => {
+        if (msg.role !== "system") {
+          const msgEl = createChatMessage(msg.role, msg.content);
+          messagesEl.appendChild(msgEl);
+        }
+      });
+      scrollToBottom();
+      if (!silent)
+        showToast({ type: "success", message: "Conversation loaded." });
+    }
+  } catch (e) {
+    if (!silent)
+      showToast({ type: "error", message: "Failed to load thread." });
+  }
+}
+
+async function deleteThread(threadId) {
+  const ok = await showAlert({
+    type: "danger",
+    title: "Delete Chat?",
+    message:
+      "This will permanently remove this conversation from your history.",
+    confirmText: "Delete",
+    cancelText: "Keep",
+  });
+  if (!ok) return;
+
+  try {
+    const res = await fetch(`${SERVER_URL}/api/chat/${threadId}`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      if (currentThreadId === threadId) {
+        messagesEl.innerHTML = "";
+        conversationHistory = [];
+        const newId = "thread_" + Math.random().toString(36).substring(2, 11);
+        currentThreadId = newId;
+        localStorage.setItem("denis_current_thread", newId);
+        emptyState.style.display = "";
+      }
+      fetchHistory();
+      showToast({ type: "success", message: "Thread deleted." });
+    }
+  } catch (e) {
+    showToast({ type: "error", message: "Delete failed." });
+  }
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function autoGrow(el) {
@@ -142,6 +241,17 @@ sendBtn?.addEventListener("click", () => {
 
 clearBtn?.addEventListener("click", confirmClear);
 
+homeBtn?.addEventListener("click", () => {
+  messagesEl.innerHTML = "";
+  messageCount = 0;
+  conversationHistory = [];
+  currentThreadId = "thread_" + Math.random().toString(36).substring(2, 11);
+  localStorage.setItem("denis_current_thread", currentThreadId);
+  emptyState.style.display = "";
+  scrollToBottom();
+  fetchHistory();
+});
+
 // ─── Clear ───────────────────────────────────────────────────────────────────
 async function confirmClear() {
   if (messageCount === 0) return;
@@ -156,8 +266,11 @@ async function confirmClear() {
     messagesEl.innerHTML = "";
     messageCount = 0;
     conversationHistory = [];
+    currentThreadId = "thread_" + Math.random().toString(36).substring(2, 11); // New thread on clear
+    localStorage.setItem("denis_current_thread", currentThreadId);
     emptyState.style.display = "";
     showToast({ type: "success", message: "Conversation cleared." });
+    fetchHistory(); // Refresh history after clearing
   }
 }
 
@@ -172,7 +285,6 @@ async function sendMessage() {
 
   if (messageCount === 0) {
     emptyState.style.display = "none";
-    addHistoryItem(sidebar, text.length > 32 ? text.slice(0, 32) + "…" : text);
   }
   messageCount++;
 
@@ -188,7 +300,10 @@ async function sendMessage() {
     const res = await fetch(`${SERVER_URL}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: conversationHistory }),
+      body: JSON.stringify({
+        messages: conversationHistory,
+        threadId: currentThreadId,
+      }),
     });
 
     if (!res.ok) {
@@ -198,11 +313,27 @@ async function sendMessage() {
     const data = await res.json();
     const reply = data.reply || "No response received.";
 
+    if (data.cached) {
+      console.log(
+        "%c[CACHE HIT] Loaded from server memory",
+        "color: #34d399; font-weight: bold;",
+      );
+    } else {
+      console.log(
+        "%c[API CALL] Fresh response from AI",
+        "color: #3b82f6; font-weight: bold;",
+      );
+    }
+
     // Store assistant reply in history
     conversationHistory.push({ role: "assistant", content: reply });
 
     typing.remove();
     appendMessage("assistant", reply);
+    scrollToBottom();
+
+    // Refresh sidebar history to show new/updated thread
+    fetchHistory();
   } catch (err) {
     typing.remove();
     const errMsg = err.message || "Something went wrong.";

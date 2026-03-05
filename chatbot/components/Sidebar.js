@@ -49,16 +49,13 @@ export function createSidebar({ userName = "Guest", onNewChat } = {}) {
     </div>
 
     <!-- History -->
-    <div class="flex-1 overflow-y-auto px-4 pb-4">
-      <p class="text-[11px] text-neutral-500 font-medium mb-3">Recent</p>
-      <div id="historyList" class="space-y-4">
-        <!-- Mock old history item -->
-        <div class="text-[13px] text-neutral-400 hover:text-white truncate cursor-pointer transition">
-          Send me the detail file for 1...
-        </div>
-        <div class="text-[13px] text-neutral-400 hover:text-white truncate cursor-pointer transition">
-          I need to generate report
-        </div>
+    <div class="flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] text-neutral-500 font-medium uppercase tracking-wider">Recent Chats</p>
+      </div>
+      <div id="historyList" class="space-y-1.5">
+        <!-- Dynamic history items will be injected here -->
+        <div class="text-[12px] text-neutral-600 italic px-2">No history yet</div>
       </div>
     </div>
 
@@ -93,13 +90,56 @@ export function createSidebar({ userName = "Guest", onNewChat } = {}) {
   return el;
 }
 
-export function addHistoryItem(sidebar, title) {
+export function renderHistory(sidebar, threads, { onSelect, onDelete }) {
   const list = sidebar.querySelector("#historyList");
-  const item = document.createElement("div");
-  item.className =
-    "text-[13px] text-white truncate cursor-pointer transition msg-animate pb-4";
-  item.textContent = title;
-  list.insertBefore(item, list.firstChild);
+  if (!list) return;
+
+  if (!threads || threads.length === 0) {
+    list.innerHTML = `<div id="historyPlaceholder" class="text-[12px] text-neutral-600 italic px-2">No history yet</div>`;
+    return;
+  }
+
+  const placeholder = list.querySelector("#historyPlaceholder");
+  if (placeholder) placeholder.remove();
+
+  list.innerHTML = "";
+  // Sort by timestamp descending
+  const sorted = [...threads].sort((a, b) => b.timestamp - a.timestamp);
+
+  sorted.forEach((thread) => {
+    const item = document.createElement("div");
+    item.className =
+      "group flex items-center justify-between gap-2 px-3 py-2 rounded-lg hover:bg-[#1c1c1c] transition-all cursor-pointer msg-animate";
+
+    item.innerHTML = `
+      <div class="flex items-center gap-2.5 min-w-0">
+        <svg class="text-neutral-500 group-hover:text-neutral-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="text-[13px] text-neutral-400 group-hover:text-white truncate font-medium">${
+          thread.title || "Untitled Chat"
+        }</span>
+      </div>
+      <button class="delete-thread-btn opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/20 text-neutral-500 hover:text-red-400 transition" title="Delete thread">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+    `;
+
+    item.addEventListener("click", (e) => {
+      if (e.target.closest(".delete-thread-btn")) return;
+      onSelect?.(thread.id);
+    });
+
+    item.querySelector(".delete-thread-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      onDelete?.(thread.id);
+    });
+
+    list.appendChild(item);
+  });
+}
+
+export function addHistoryItem(sidebar, title) {
+  // Now handled by renderHistory for better consistency,
+  // but keeping the signature for simple append if needed.
 }
 
 export function toggleSidebar(sidebar) {
