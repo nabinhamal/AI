@@ -1,6 +1,10 @@
 # 🤖 Denis — AI-Powered Web Chatbot & Dashboard
 
+![Denis Banner](bg.png)
+
 Denis is a sophisticated, full-stack conversational AI assistant powered by **Groq LLM** and **Tavily Web Search**. It combines a premium, high-fidelity web interface with a powerful Node.js backend to provide real-time information and intelligent assistance.
+
+> 🔗 **GitHub Repository**: [nabinhamal/AI](https://github.com/nabinhamal/AI)
 
 ---
 
@@ -105,7 +109,7 @@ Follow these steps to get the project running locally:
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/nabinhamal/AI
 cd AI
 ```
 
